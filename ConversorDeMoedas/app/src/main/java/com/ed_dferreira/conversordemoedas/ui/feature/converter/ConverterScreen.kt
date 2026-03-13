@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,10 +47,13 @@ fun ConverterScreen() {
     val viewModel = viewModel<ConverterViewModel>()
 
     val formState by viewModel.formState.collectAsStateWithLifecycle()
+    val conversionState by viewModel.conversionState.collectAsStateWithLifecycle()
+
 
     ConverterContent(
         formState = formState,
-        onFormEvent = viewModel::onFormEvent,
+        conversionState = conversionState,
+        onFormEvent = viewModel::onFormEvent
     )
 }
 
@@ -57,6 +61,7 @@ fun ConverterScreen() {
 @Composable
 fun ConverterContent(
     formState: ConverterFormState,
+    conversionState: ConverterViewModel.ConversionState,
     onFormEvent: (ConverterFormEvent) -> Unit,
 ) {
     Scaffold(
@@ -130,10 +135,42 @@ fun ConverterContent(
                 }
             }
 
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 32.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                when (conversionState) {
+                    ConverterViewModel.ConversionState.Idle -> {
+                        // no UI
+                    }
+
+                    ConverterViewModel.ConversionState.Loading -> {
+                        CircularProgressIndicator()
+                    }
+
+                    ConverterViewModel.ConversionState.Success -> {
+                        Text(
+                            text = "Conversão realizada com sucesso!"
+                        )
+                    }
+
+                    is ConverterViewModel.ConversionState.Error -> {
+                        Text(
+                            text = conversionState.message,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+
             Box(modifier = Modifier.weight(1f)) //empurra para a parte de baixo da tela
 
             Button(
-                onClick = {},
+                onClick = {
+                    onFormEvent(ConverterFormEvent.SendConverterForm)
+                },
                 modifier = Modifier
                     .fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
@@ -159,7 +196,9 @@ private fun ConverterContentPreview() {
                 fromCurrenciesList = listOf("BRL", "USD", "EUR"),
                 toCurrenciesList = listOf("USD", "BRL", "EUR"),
                 fromCurrencySelected = "BRL",
-                toCurrencySelected = "USD",),
+                toCurrencySelected = "USD",
+            ),
+            conversionState = ConverterViewModel.ConversionState.Success,
             onFormEvent = {},
         )
     }

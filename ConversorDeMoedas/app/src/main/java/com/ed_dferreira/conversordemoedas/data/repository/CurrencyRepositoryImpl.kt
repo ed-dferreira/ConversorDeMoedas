@@ -4,9 +4,10 @@ import com.ed_dferreira.conversordemoedas.data.network.KtorClient
 import com.ed_dferreira.conversordemoedas.domain.model.CurrencyConversion
 import com.ed_dferreira.conversordemoedas.domain.repository.CurrencyRepository
 import java.util.Currency
+import javax.inject.Inject
 
-class CurrencyRepositoryImpl(
-    private val ktorClient: KtorClient
+class CurrencyRepositoryImpl  @Inject constructor(
+    private val ktorClient: KtorClient,
 ) : CurrencyRepository {
     override suspend fun convertCurrency(
         fromCurrency: String,
